@@ -19,7 +19,6 @@ Route::get('/', function () {
     $users = \App\Models\User::all();
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
-
     $header_culumns = [];
     $i = 'A';
     // set header
@@ -31,8 +30,6 @@ Route::get('/', function () {
         $header_culumns[] = [$i=>$value];
         $i++;
     }
-
-
     $i = 'A';
     $key_index = 2;
     foreach ($header_culumns as $key => $value) {
@@ -49,9 +46,6 @@ Route::get('/', function () {
         $key_index = 2;
 
     }
-
-
-
     $sheet->setCellValue('I1', 'Total');
     $sheet->mergeCells('I1:J1');
     $sheet->getStyle('I1')->getAlignment()->setHorizontal('center');
@@ -61,5 +55,26 @@ Route::get('/', function () {
     $writer = new Xlsx($spreadsheet);
     $writer->save('hello world.xlsx');
 
-    return \Response::download($writer, 'hello world.xlsx');
+    $filename = Date('Y-m-d-H').'-hello world.xlsx';
+
+    
+    return response()->download(public_path('hello world.xlsx'), $filename, [
+        'Content-Type' => 'application/vnd.ms-excel',
+        'Content-Disposition' => 'inline; filename="' . $filename . '"'
+    ]);
+});
+
+
+Route::get('/read', function () {
+    $file = public_path('hello world.xlsx');
+//    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file);
+//    $sheet = $spreadsheet->getActiveSheet();
+//    dd($sheet->toArray());
+
+
+
+    $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+    $spreadsheet = $reader->load($file);
+    $sheet = $spreadsheet->getActiveSheet();
+    dd($sheet->toArray());
 });
